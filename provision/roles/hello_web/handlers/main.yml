@@ -1,0 +1,4 @@
+---
+# handlers file for provision/roles/hello_web
+- name: start flask service
+  service: name=flask-app state=restarted

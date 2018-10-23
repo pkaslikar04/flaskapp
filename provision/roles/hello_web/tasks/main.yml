@@ -1,0 +1,64 @@
+---
+# tasks file for provision/roles/hello_web
+- include_tasks: tasks/configure_ntp.yml
+
+- name: download get-pip.py
+  get_url: url=https://bootstrap.pypa.io/get-pip.py dest=/tmp/get-pip.py
+
+- name: install pip
+  command: python /tmp/get-pip.py
+
+- name: install flask and Werkzeug
+  pip: name={{ item }}
+  with_items:
+  - flask
+  - Werkzeug
+
+- name: install git package
+  apt: 
+    name: git
+    state: present
+    update_cache: yes
+  
+- name: Git Clone repo into the VM
+  git:
+    repo: https://bitbucket.org/azneita/devops-challenge.git
+    version: master
+    dest: /webapps/devops
+    accept_hostkey: yes
+    force: yes
+
+- name: Creating application Userid
+  user:
+   name: webapp
+   comment: "Application ID"
+   uid: 1040
+
+- name: Set permission on /webapps directory
+  file:
+    path: /webapps
+    state: directory
+    mode: 0755
+    owner: webapp
+    group: webapp
+    recurse: yes
+
+- name: Copy Flask service file
+  copy: 
+    src: files/flask-app.conf
+    dest: /etc/init/flask-app.conf
+    owner: root
+    group: root
+    mode: 0755
+  
+- name: Create Flask service 
+  command: sudo ln -s /etc/init/flask-app.conf /etc/init.d/flask-app
+ 
+- include: handlers/main.yml
+  notify:
+    - start flask service
+
+- name: Configure log rotation
+  copy: 
+    src=files/flask.logrotate
+    dest=/etc/logrotate.d/flask.logrotate
