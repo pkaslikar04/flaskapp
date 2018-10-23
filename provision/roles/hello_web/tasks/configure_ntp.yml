@@ -9,4 +9,4 @@
     mode: 0644
     backup: yes 
 - name: Start service NTP 
-  shell: 'chkconfig ntpd on && service ntp restart'
+  shell: 'service ntp restart'
