@@ -53,9 +53,6 @@
     group: root
     mode: 0755
   
-- name: Create Flask service 
-  command: sudo ln -s /etc/init/flask-app.conf /etc/init.d/flask-app
- 
 - include: handlers/main.yml
   notify:
     - start flask service
